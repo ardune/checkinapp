@@ -1,21 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Intrinsics.Arm;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Google.Apis.Auth.OAuth2;
-using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
@@ -101,19 +97,79 @@ public static class WebTrigger
             return new UnauthorizedResult();
         }
 
-        string response = await new StreamReader(req.Body).ReadToEndAsync();
+        string answerToQuestion = await new StreamReader(req.Body).ReadToEndAsync();
 
-        log.LogInformation(response);
+        using var service = FunctionHelper.GetSheetsService();
+        var ctNow = FunctionHelper.GetCentralTimeNow();
+        var spreadsheetId = FunctionHelper.GetEnvironmentVariable("SheetId");
+
+        var emptyUpdateRequest = service.Spreadsheets.Values.Append(new ValueRange
+        {
+            Values = new List<IList<object>>
+            {
+                new List<object>()
+            },
+        }, spreadsheetId, "Logs!A:D");
+        emptyUpdateRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
+
+        var emptyUpdateResult = await emptyUpdateRequest.ExecuteAsync();
+        // when update is used without any data - the result points to the cell that would have been appended to
+        var rowNumber = int.Parse(Regex.Replace(emptyUpdateResult.Updates.UpdatedRange, "[^0-9]", string.Empty));
+
+        var sheetRef = await service.Spreadsheets.Get(spreadsheetId).ExecuteAsync();
+        var sheetId = sheetRef.Sheets.Single(x => x.Properties.Title == "Logs");
+        await service.Spreadsheets.BatchUpdate(new BatchUpdateSpreadsheetRequest
+        {
+            Requests = new List<Request>
+            {
+                new()
+                {
+                    UpdateCells = new UpdateCellsRequest
+                    {
+                        Fields = "*",
+                        Start = new GridCoordinate
+                        {
+                            ColumnIndex = 2,
+                            // row number - 2 because 0-index and we want last row with data
+                            RowIndex = rowNumber - 2,
+                            SheetId = sheetId.Properties.SheetId
+                        },
+                        Rows = new List<RowData>
+                        {
+                            new()
+                            {
+                                Values = new List<CellData>
+                                {
+                                    new()
+                                    {
+                                        UserEnteredValue = new ExtendedValue
+                                        {
+                                            StringValue = answerToQuestion,
+                                        },
+                                    },
+                                    new()
+                                    {
+                                        UserEnteredValue = new ExtendedValue
+                                        {
+                                            StringValue = ctNow.ToString(FunctionHelper.DateFormat),
+                                        },
+                                    },
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }, spreadsheetId).ExecuteAsync();
+
+        await emptyUpdateRequest.ExecuteAsync();
         return new OkResult();
     }
 
     [FunctionName("Test")]
-    public static async Task<IActionResult> Test([HttpTrigger(AuthorizationLevel.Function, "get", Route = "test")] HttpRequest req, ILogger log)
+    public static Task<IActionResult> Test([HttpTrigger(AuthorizationLevel.Function, "get", Route = "test")] HttpRequest req, ILogger log)
     {
-        var central = TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time");
-        var result = TimeZoneInfo.ConvertTimeFromUtc(DateTimeOffset.UtcNow.UtcDateTime, central);
-
-        return new OkResult();
+        return Task.FromResult<IActionResult>(new OkResult());
     }
 
     private static bool IsAuthorized(HttpRequest req)
