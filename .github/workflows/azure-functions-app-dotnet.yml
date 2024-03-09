@@ -23,13 +23,13 @@ on:
     branches: ["master"]
 
 env:
-  AZURE_FUNCTIONAPP_NAME: 'howareyoudoing'   # set this to your function app name on Azure
+  AZURE_FUNCTIONAPP_NAME: 'ubuntu-latest'   # set this to your function app name on Azure
   AZURE_FUNCTIONAPP_PACKAGE_PATH: '.'       # set this to the path to your function app project, defaults to the repository root
-  DOTNET_VERSION: '8.0.x'                   # set this to the dotnet version to use (e.g. '2.1.x', '3.1.x', '5.0.x')
+  DOTNET_VERSION: '6.0.x'                   # set this to the dotnet version to use (e.g. '2.1.x', '3.1.x', '5.0.x')
 
 jobs:
   build-and-deploy:
-    runs-on: windows-latest # For Linux, use ubuntu-latest
+    runs-on: ubuntu-latest # For Linux, use ubuntu-latest
     environment: dev
     steps:
     - name: 'Checkout GitHub Action'
@@ -47,7 +47,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: 'Resolve Project Dependencies Using Dotnet'
-      shell: pwsh # For Linux, use bash
+      shell: bash # For Linux, use bash
       run: |
         pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
         dotnet build --configuration Release --output ./output
