@@ -23,10 +23,6 @@ public static class WebTrigger
         {
             return new UnauthorizedResult();
         }
-        if (!string.Equals(FunctionHelper.GetEnvironmentVariable("ToPhoneNumber"), form["From"]))
-        {
-            return new UnauthorizedResult();
-        }
 
         var answerToQuestion = form["Body"];
         using var service = FunctionHelper.GetSheetsService();
