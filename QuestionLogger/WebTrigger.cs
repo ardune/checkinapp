@@ -16,7 +16,7 @@ namespace QuestionLogger;
 public static class WebTrigger
 {
     [FunctionName("SmsResponse")]
-    public static async Task<IActionResult> ReportResponseSms([HttpTrigger(AuthorizationLevel.Function, "post", Route = "sms-in")] HttpRequest req, ILogger log)
+    public static async Task<IActionResult> ReportResponseSms([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "sms-in")] HttpRequest req, ILogger log)
     {
         var form = await req.ReadFormAsync();
         if (!IsTwilioAuthorized(req, form))
@@ -97,8 +97,7 @@ public static class WebTrigger
     {
         //see: https://www.twilio.com/docs/usage/tutorials/how-to-secure-your-csharp-aspnet-core-app-by-validating-incoming-twilio-requests#use-filter-attribute-to-validate-twilio-requests
         var authToken = FunctionHelper.GetEnvironmentVariable("TwilioAuth");
-        var host = FunctionHelper.GetEnvironmentVariable("Host");
-        var url  = $"{host}{req.Path}";
+        var url = FunctionHelper.GetEnvironmentVariable("TwilioCallbackUrl");
         var twilioSignature  = req.Headers["X-Twilio-Signature"];
         var parameters = form.ToDictionary(p => p.Key, p => p.Value.ToString());
         var validator = new RequestValidator(authToken);
