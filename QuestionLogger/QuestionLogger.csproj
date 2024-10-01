@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <AzureFunctionsVersion>V4</AzureFunctionsVersion>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Google.Apis.Sheets.v4" Version="1.67.0.3148" />
-        <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="4.1.1"/>
-        <PackageReference Include="Twilio" Version="7.0.2" />
+        <PackageReference Include="Google.Apis.Sheets.v4" Version="1.68.0.3547" />
+        <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="4.4.1" />
+        <PackageReference Include="Twilio" Version="7.4.0" />
     </ItemGroup>
     <ItemGroup>
         <None Update="host.json">

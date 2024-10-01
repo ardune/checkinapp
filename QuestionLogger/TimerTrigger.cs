@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
@@ -13,11 +16,26 @@ namespace QuestionLogger;
 
 public static class TimerTrigger
 {
+    // [FunctionName("ForceMessage")]
+    // public static async Task<IActionResult> ForceMessageSms([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "sms-out")] HttpRequest req, ILogger log)
+    // {
+    //     log.LogInformation($"ForceMessage function executed at: {DateTime.UtcNow}");
+    //
+    //     await SendMessage(log);
+    //
+    //     return new OkResult();
+    // }
+
     [FunctionName("TimerTrigger")]
     public static async Task RunAsync([TimerTrigger("0 0 * * * *")] TimerInfo myTimer, ILogger log)
     {
         log.LogInformation($"C# Timer trigger function executed at: {DateTime.UtcNow}");
 
+        await SendMessage(log);
+    }
+
+    private static async Task SendMessage(ILogger log)
+    {
         var question = await GetQuestion();
         if (string.IsNullOrWhiteSpace(question))
         {
