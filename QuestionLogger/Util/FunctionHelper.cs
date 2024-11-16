@@ -1,10 +1,9 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 
-namespace QuestionLogger;
+namespace QuestionLogger.Util;
 
 public static class FunctionHelper
 {

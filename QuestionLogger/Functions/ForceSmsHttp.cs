@@ -2,8 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
+using QuestionLogger.Util;
 
-namespace QuestionLogger;
+namespace QuestionLogger.Functions;
 
 public static class ForceSmsHttp
 {

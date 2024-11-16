@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Google.Apis.Sheets.v4;
+﻿using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 using Microsoft.Extensions.Logging;
-using QuestionLogger;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Types;
+
+namespace QuestionLogger.Util;
 
 public static class SmsHelpers
 {
