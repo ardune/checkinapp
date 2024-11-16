@@ -1,22 +1,17 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using System.Text.RegularExpressions;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
+using Microsoft.Azure.Functions.Worker;
 using Twilio.Security;
 
 namespace QuestionLogger;
 
-public static class WebTrigger
+public static class SmsWebhookHttp
 {
-    [FunctionName("SmsResponse")]
-    public static async Task<IActionResult> ReportResponseSms([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "sms-in")] HttpRequest req, ILogger log)
+    [Function(nameof(SmsWebhookHttp))]
+    public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "sms-in")] HttpRequest req)
     {
         var form = await req.ReadFormAsync();
         if (!IsTwilioAuthorized(req, form))

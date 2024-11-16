@@ -11,7 +11,8 @@ public static class FunctionHelper
     public static string GetEnvironmentVariable(string name)
     {
         return Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.Process) ??
-               Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.User);
+               Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.User) ??
+               string.Empty;
     }
 
     public static SheetsService GetSheetsService()
